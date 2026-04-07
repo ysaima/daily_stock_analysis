@@ -289,7 +289,7 @@ OPENAI_MODEL=deepseek-chat
 2. 检查端口映射是否正确：
    ```yaml
    ports:
-     - "8000:8000"
+     - "8000:9000"
    ```
 
 ---

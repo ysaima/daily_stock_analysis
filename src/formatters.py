@@ -398,6 +398,135 @@ def slice_at_max_bytes(text: str, max_bytes: int) -> tuple[str, str]:
     return truncated, text[len(truncated):]
 
 
+def format_dingtalk_markdown(content: str) -> str:
+    """
+    将通用 Markdown 转换为钉钉机器人支持的格式，针对手机小屏优化。
+
+    钉钉自定义机器人 Markdown 仅支持：
+    - 标题（# ## ### 等）
+    - 加粗（**text**）
+    - 链接、图片
+    - 有序/无序列表
+    - 引用（> text）
+
+    不支持：表格、分隔线(---)、代码块、斜体
+
+    转换规则：
+    - 表格 → 每行一个键值对，竖排阅读
+    - 分隔线 → 空行
+    - 用 | 拼接的长行 → 拆成多行
+    - 保留标题、加粗、列表、引用等钉钉支持的语法
+
+    Args:
+        content: 原始 Markdown 内容
+
+    Returns:
+        钉钉友好的 Markdown 格式内容
+    """
+    def _flush_table(buffer: List[str], output: List[str]) -> None:
+        if not buffer:
+            return
+
+        rows = []
+        for raw in buffer:
+            if re.match(r'^\s*\|?\s*[-:]+\s*(\|\s*[-:]+\s*)+\|?\s*$', raw):
+                continue
+            cells = [c.strip() for c in raw.strip().strip('|').split('|')]
+            cells = [c for c in cells if c]
+            if cells:
+                rows.append(cells)
+
+        if not rows:
+            return
+
+        header = rows[0]
+        data_rows = rows[1:] if len(rows) > 1 else []
+
+        if not data_rows:
+            output.append(' | '.join(f"**{h}**" for h in header))
+            return
+
+        n_cols = len(header)
+
+        # 两列键值表：合并成一行 key：value
+        if n_cols == 2:
+            for row in data_rows:
+                key = row[0] if len(row) > 0 else ""
+                val = row[1] if len(row) > 1 else ""
+                output.append(f"- {key}：{val}")
+        elif n_cols <= 5:
+            # 3-5 列：每行合并为一条，字段间用 / 分隔
+            for row in data_rows:
+                parts = []
+                for idx, cell in enumerate(row):
+                    key = header[idx] if idx < n_cols else ""
+                    if key and cell and key != cell:
+                        parts.append(f"{key} {cell}")
+                    elif cell:
+                        parts.append(cell)
+                output.append('- ' + ' / '.join(parts))
+        else:
+            # 6+ 列：竖排，每个字段独占一行
+            for row in data_rows:
+                for idx, cell in enumerate(row):
+                    key = header[idx] if idx < n_cols else ""
+                    if key and cell and key != cell:
+                        output.append(f"- {key}：{cell}")
+                    elif cell:
+                        output.append(f"- {cell}")
+
+    def _break_long_line(line: str) -> str:
+        """把用 | 拼接的长行拆成多行，每段独占一行"""
+        stripped = line.lstrip()
+        # 跳过引用行和列表项
+        if stripped.startswith('>') or stripped.startswith('-'):
+            return line
+        if ' | ' not in line or len(line) < 50:
+            return line
+        # 保留摘要行（emoji 开头的短摘要）
+        if re.match(r'^[⚪🟢🟡🔴🟠⚫]', stripped):
+            return line
+        parts = [p.strip() for p in stripped.split(' | ')]
+        if len(parts) < 3:
+            return line
+        indent = len(line) - len(stripped)
+        prefix = line[:indent]
+        return '\n'.join(f"{prefix}{p}" for p in parts if p)
+
+    lines: List[str] = []
+    table_buffer: List[str] = []
+
+    for raw_line in content.splitlines():
+        line = raw_line.rstrip()
+
+        if line.strip().startswith('|'):
+            table_buffer.append(line)
+            continue
+
+        if table_buffer:
+            _flush_table(table_buffer, lines)
+            table_buffer = []
+
+        # 分隔线 → 空行
+        if line.strip() == '---':
+            lines.append('')
+            continue
+
+        lines.append(_break_long_line(line))
+
+    if table_buffer:
+        _flush_table(table_buffer, lines)
+
+    # 清理连续空行（最多保留1个）
+    result: List[str] = []
+    for line in lines:
+        if line.strip() == '' and result and result[-1].strip() == '':
+            continue
+        result.append(line)
+
+    return '\n'.join(result).strip()
+
+
 def format_feishu_markdown(content: str) -> str:
     """
     将通用 Markdown 转换为飞书 lark_md 更友好的格式

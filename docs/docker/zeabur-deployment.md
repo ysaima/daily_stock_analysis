@@ -194,15 +194,15 @@ Dockerfile 已采用多阶段构建，前端会在镜像构建时自动打包。
 
 系统内置了健康检查机制，默认检查：
 
-- WebUI 模式：检查 `http://localhost:8000/health` 端点
-- FastAPI 模式：检查 `http://localhost:8000/api/health` 端点
+- WebUI 模式：检查 `http://localhost:9000/health` 端点
+- FastAPI 模式：检查 `http://localhost:9000/api/health` 端点
 - 非服务模式：始终返回健康状态
 
 健康检查配置如下：
 
 ```dockerfile
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:8000/api/health || curl -f http://localhost:8000/health \
+    CMD curl -f http://localhost:9000/api/health || curl -f http://localhost:9000/health \
     || python -c "import sys; sys.exit(0)"
 ```
 

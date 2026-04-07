@@ -91,7 +91,7 @@
       "daily-stock-analysis": {
         "enabled": true,
         "env": {
-          "DSA_BASE_URL": "http://localhost:8000"
+          "DSA_BASE_URL": "http://localhost:9000"
         }
       }
     }
@@ -99,7 +99,7 @@
 }
 ```
 
-- 本地部署：`http://localhost:8000` 或 `http://127.0.0.1:8000`
+- 本地部署：`http://localhost:9000` 或 `http://127.0.0.1:9000`
 - 远程部署：替换为实际 URL
 - **建议**：`DSA_BASE_URL` 勿以 `/` 结尾
 
@@ -155,7 +155,7 @@ metadata:
 若 daily_stock_analysis 已启用 `AGENT_MODE=true`，可调用 Agent 策略问股接口，支持多轮对话与多种策略（缠论、均线金叉等）：
 
 ```bash
-# 将 {DSA_BASE_URL} 替换为实际配置的 API 地址（如 http://localhost:8000）
+# 将 {DSA_BASE_URL} 替换为实际配置的 API 地址（如 http://localhost:9000）
 curl -X POST {DSA_BASE_URL}/api/v1/agent/chat \
   -H 'Content-Type: application/json' \
   -d '{"message": "用缠论分析 600519", "session_id": "optional-session-id"}'

@@ -10,7 +10,7 @@ import json
 import requests
 
 from src.config import Config
-from src.formatters import chunk_content_by_max_bytes, slice_at_max_bytes
+from src.formatters import chunk_content_by_max_bytes, format_dingtalk_markdown, slice_at_max_bytes
 
 
 logger = logging.getLogger(__name__)
@@ -160,7 +160,7 @@ class CustomWebhookSender:
             return {
                 "msgtype": "markdown",
                 "markdown": {
-                    "title": "股票分析报告",
+                    "title": "saima股票分析报告",
                     "text": content
                 }
             }
@@ -199,6 +199,7 @@ class CustomWebhookSender:
     def _send_dingtalk_chunked(self, url: str, content: str, max_bytes: int = 20000) -> bool:
         import time as _time
 
+        content = format_dingtalk_markdown(content)
         # 为 payload 开销预留空间，避免 body 超限
         budget = max(1000, max_bytes - 1500)
         chunks = chunk_content_by_max_bytes(content, budget)

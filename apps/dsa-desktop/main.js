@@ -103,7 +103,7 @@ function ensureEnvFile(envPath) {
   fs.writeFileSync(envPath, '# Configure your API keys and stock list here.\n', 'utf-8');
 }
 
-function findAvailablePort(startPort = 8000, endPort = 8100) {
+function findAvailablePort(startPort = 9000, endPort = 9100) {
   return new Promise((resolve, reject) => {
     const tryPort = (port) => {
       if (port > endPort) {
@@ -458,7 +458,7 @@ async function createWindow() {
   logStartup(`Env file ready: ${envPath}`);
 
   const portFindStartedAt = Date.now();
-  const port = await findAvailablePort(8000, 8100);
+  const port = await findAvailablePort(9000, 9100);
   logStartup(`Using port ${port} (selected in ${Date.now() - portFindStartedAt}ms)`);
   logStartup(`App directory=${appDir}`);
 

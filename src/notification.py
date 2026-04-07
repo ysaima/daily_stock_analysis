@@ -36,6 +36,7 @@ from src.utils.data_processing import normalize_model_used
 from src.notification_sender import (
     AstrbotSender,
     CustomWebhookSender,
+    DingtalkSender,
     DiscordSender,
     EmailSender,
     FeishuSender,
@@ -61,6 +62,7 @@ class NotificationChannel(Enum):
     PUSHPLUS = "pushplus"  # PushPlus（国内推送服务）
     SERVERCHAN3 = "serverchan3"  # Server酱3（手机APP推送服务）
     CUSTOM = "custom"      # 自定义 Webhook
+    DINGTALK = "dingtalk"  # 钉钉机器人
     DISCORD = "discord"    # Discord 机器人 (Bot)
     SLACK = "slack"        # Slack
     ASTRBOT = "astrbot"
@@ -86,6 +88,7 @@ class ChannelDetector:
             NotificationChannel.PUSHPLUS: "PushPlus",
             NotificationChannel.SERVERCHAN3: "Server酱3",
             NotificationChannel.CUSTOM: "自定义Webhook",
+            NotificationChannel.DINGTALK: "钉钉",
             NotificationChannel.DISCORD: "Discord机器人",
             NotificationChannel.SLACK: "Slack",
             NotificationChannel.ASTRBOT: "ASTRBOT机器人",
@@ -97,6 +100,7 @@ class ChannelDetector:
 class NotificationService(
     AstrbotSender,
     CustomWebhookSender,
+    DingtalkSender,
     DiscordSender,
     EmailSender,
     FeishuSender,
@@ -150,6 +154,7 @@ class NotificationService(
         # 初始化各渠道
         AstrbotSender.__init__(self, config)
         CustomWebhookSender.__init__(self, config)
+        DingtalkSender.__init__(self, config)
         DiscordSender.__init__(self, config)
         EmailSender.__init__(self, config)
         FeishuSender.__init__(self, config)
@@ -297,6 +302,10 @@ class NotificationService(
         if self._custom_webhook_urls:
             channels.append(NotificationChannel.CUSTOM)
         
+        # 钉钉
+        if self._dingtalk_webhook_url:
+            channels.append(NotificationChannel.DINGTALK)
+
         # Discord
         if self._is_discord_configured():
             channels.append(NotificationChannel.DISCORD)
@@ -1668,6 +1677,8 @@ class NotificationService(
                         result = self.send_to_custom(content)
                 elif channel == NotificationChannel.DISCORD:
                     result = self.send_to_discord(content)
+                elif channel == NotificationChannel.DINGTALK:
+                    result = self.send_to_dingtalk(content)
                 elif channel == NotificationChannel.SLACK:
                     if use_image:
                         result = self._send_slack_image(

@@ -287,7 +287,7 @@ Work through the following 5 checkpoints in order:
 2. Check port mapping is correct:
    ```yaml
    ports:
-     - "8000:8000"
+     - "8000:9000"
    ```
 
 ---

@@ -1648,6 +1648,8 @@ class StockAnalysisPipeline:
                         non_wechat_success = self.notifier.send_to_pushover(report) or non_wechat_success
                     elif channel == NotificationChannel.ASTRBOT:
                         non_wechat_success = self.notifier.send_to_astrbot(report) or non_wechat_success
+                    elif channel == NotificationChannel.DINGTALK:
+                        non_wechat_success = self.notifier.send_to_dingtalk(report) or non_wechat_success
                     elif channel == NotificationChannel.SLACK:
                         use_image = self.notifier._should_use_image_for_channel(
                             channel, image_bytes

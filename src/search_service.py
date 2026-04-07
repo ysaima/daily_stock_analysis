@@ -1684,6 +1684,113 @@ class BraveSearchProvider(BaseSearchProvider):
         )
 
 
+class EastMoneySearchProvider(BaseSearchProvider):
+    """
+    东方财富新闻搜索（无需 API Key，直接抓取公开接口）。
+
+    使用东方财富财经搜索接口获取个股相关新闻，适合 A 股中文新闻场景。
+    """
+
+    SEARCH_URL = "https://search-api-web.eastmoney.com/search/jsonp"
+    TIMEOUT = 8
+
+    def __init__(self) -> None:
+        # 无需 API Key，传空列表；用 dummy key 让基类轮询逻辑正常
+        super().__init__(["_no_key_"], "EastMoney")
+
+    @property
+    def is_available(self) -> bool:
+        return True
+
+    def _do_search(self, query: str, api_key: str, max_results: int, days: int = 7) -> SearchResponse:
+        import json as _json
+        from urllib.parse import quote
+
+        param_obj = {
+            "uid": "",
+            "keyword": query,
+            "type": ["cmsArticleWebOld"],
+            "client": "web",
+            "clientType": "web",
+            "clientVersion": "curr",
+            "param": {
+                "cmsArticleWebOld": {
+                    "searchScope": "default",
+                    "sort": "default",
+                    "pageIndex": 1,
+                    "pageSize": min(max_results, 20),
+                    "preTag": "",
+                    "postTag": "",
+                }
+            },
+        }
+
+        cb = "jQuery_eastmoney"
+        url = f"{self.SEARCH_URL}?cb={cb}&param={quote(_json.dumps(param_obj, ensure_ascii=False))}"
+
+        try:
+            resp = requests.get(
+                url,
+                headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36", "Referer": "https://so.eastmoney.com/"},
+                timeout=self.TIMEOUT,
+            )
+            resp.raise_for_status()
+
+            text = resp.text.strip()
+            # 去掉 JSONP 包裹: jQuery_eastmoney({...}) 或 jQuery_eastmoney({...});
+            prefix = cb + "("
+            if text.startswith(prefix):
+                text = text[len(prefix):]
+                if text.endswith(");"):
+                    text = text[:-2]
+                elif text.endswith(")"):
+                    text = text[:-1]
+
+            data = _json.loads(text)
+            # result.cmsArticleWebOld 可能是 list 或 dict 含 list
+            raw = data.get("result", {}).get("cmsArticleWebOld", [])
+            articles = raw if isinstance(raw, list) else raw.get("list", []) if isinstance(raw, dict) else []
+
+            results: List[SearchResult] = []
+            for item in articles:
+                title = (item.get("title") or "").strip()
+                # 去掉 HTML 高亮标签
+                title = re.sub(r"<[^>]+>", "", title)
+                content = (item.get("content") or "").strip()
+                content = re.sub(r"<[^>]+>", "", content)
+                art_url = (item.get("url") or "").strip()
+                date_str = (item.get("date") or "").strip()
+                source = (item.get("mediaName") or "eastmoney.com").strip()
+
+                if not title:
+                    continue
+                results.append(
+                    SearchResult(
+                        title=title,
+                        snippet=content[:300] if content else "",
+                        url=art_url,
+                        source=source,
+                        published_date=date_str,
+                    )
+                )
+
+            return SearchResponse(
+                query=query,
+                results=results[:max_results],
+                provider=self.name,
+                success=True,
+            )
+
+        except Exception as e:
+            return SearchResponse(
+                query=query,
+                results=[],
+                provider=self.name,
+                success=False,
+                error_message=str(e),
+            )
+
+
 class SearXNGSearchProvider(BaseSearchProvider):
     """
     SearXNG search engine (self-hosted, no quota).
@@ -2164,6 +2271,10 @@ class SearchService:
         )
 
         # 初始化搜索引擎（按优先级排序）
+        # 0. EastMoney（东方财富，无需 API Key，A股新闻优先）
+        self._providers.append(EastMoneySearchProvider())
+        logger.info("已配置 EastMoney（东方财富）搜索（无需 API Key）")
+
         # 1. Bocha 优先（中文搜索优化，AI摘要）
         if bocha_keys:
             self._providers.append(BochaSearchProvider(bocha_keys))

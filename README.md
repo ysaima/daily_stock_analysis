@@ -437,7 +437,7 @@ LITELLM_MODEL=openai/deepseek-chat
    cd ../..
    ```
 
-访问 `http://127.0.0.1:8000` 即可使用。
+访问 `http://127.0.0.1:9000` 即可使用。
 
 > 在云服务器上部署后，不知道浏览器该输入什么地址？请看 [云服务器 Web 界面访问指南](docs/deploy-webui-cloud.md)。
 

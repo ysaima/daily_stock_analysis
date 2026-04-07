@@ -325,7 +325,7 @@ docker-compose -f ./docker/docker-compose.yml up -d analyzer   # Scheduled task 
 docker-compose -f ./docker/docker-compose.yml up -d            # Start both modes
 
 # 4. Access WebUI
-# http://localhost:8000
+# http://localhost:9000
 
 # 5. View logs
 docker-compose -f ./docker/docker-compose.yml logs -f server
@@ -371,7 +371,7 @@ services:
     container_name: stock-server
     command: ["python", "main.py", "--serve-only", "--host", "0.0.0.0", "--port", "8000"]
     ports:
-      - "8000:8000"
+      - "8000:9000"
 ```
 
 ### Common Commands
@@ -829,34 +829,34 @@ FastAPI provides RESTful API service for configuration management and triggering
 **Usage examples**:
 ```bash
 # Health check
-curl http://127.0.0.1:8000/api/health
+curl http://127.0.0.1:9000/api/health
 
 # Trigger analysis (A-shares)
-curl -X POST http://127.0.0.1:8000/api/v1/analysis/analyze \
+curl -X POST http://127.0.0.1:9000/api/v1/analysis/analyze \
   -H 'Content-Type: application/json' \
   -d '{"stock_code": "600519"}'
 
 # Query task status
-curl http://127.0.0.1:8000/api/v1/analysis/status/<task_id>
+curl http://127.0.0.1:9000/api/v1/analysis/status/<task_id>
 
 # Trigger backtest (all stocks)
-curl -X POST http://127.0.0.1:8000/api/v1/backtest/run \
+curl -X POST http://127.0.0.1:9000/api/v1/backtest/run \
   -H 'Content-Type: application/json' \
   -d '{"force": false}'
 
 # Trigger backtest (specific stock)
-curl -X POST http://127.0.0.1:8000/api/v1/backtest/run \
+curl -X POST http://127.0.0.1:9000/api/v1/backtest/run \
   -H 'Content-Type: application/json' \
   -d '{"code": "600519", "force": false}'
 
 # Query overall backtest performance
-curl http://127.0.0.1:8000/api/v1/backtest/performance
+curl http://127.0.0.1:9000/api/v1/backtest/performance
 
 # Query per-stock backtest performance
-curl http://127.0.0.1:8000/api/v1/backtest/performance/600519
+curl http://127.0.0.1:9000/api/v1/backtest/performance/600519
 
 # Paginated backtest results
-curl "http://127.0.0.1:8000/api/v1/backtest/results?page=1&limit=20"
+curl "http://127.0.0.1:9000/api/v1/backtest/results?page=1&limit=20"
 ```
 
 ### Custom Configuration
@@ -877,7 +877,7 @@ python main.py --serve-only --host 0.0.0.0 --port 8888
 
 ### Notes
 
-- Browser access: `http://127.0.0.1:8000` (or your configured port)
+- Browser access: `http://127.0.0.1:9000` (or your configured port)
 - After analysis completion, notifications are automatically pushed to configured channels
 - This feature is automatically disabled in GitHub Actions environment
 

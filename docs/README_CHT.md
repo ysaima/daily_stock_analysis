@@ -230,8 +230,8 @@
 | `python main.py --serve` | 啟動 API 服務 + 執行一次完整分析 |
 | `python main.py --serve-only` | 僅啟動 API 服務，手動觸發分析 |
 
-- 訪問地址：`http://127.0.0.1:8000`
-- API 文檔：`http://127.0.0.1:8000/docs`
+- 訪問地址：`http://127.0.0.1:9000`
+- API 文檔：`http://127.0.0.1:9000/docs`
 
 ### 功能特性
 

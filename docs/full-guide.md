@@ -360,7 +360,7 @@ docker-compose -f ./docker/docker-compose.yml up -d analyzer   # 定时任务模
 docker-compose -f ./docker/docker-compose.yml up -d            # 同时启动两种模式
 
 # 4. 访问 WebUI
-# http://localhost:8000
+# http://localhost:9000
 
 # 5. 查看日志
 docker-compose -f ./docker/docker-compose.yml logs -f server
@@ -408,7 +408,7 @@ services:
     container_name: stock-server
     command: ["python", "main.py", "--serve-only", "--host", "0.0.0.0", "--port", "8000"]
     ports:
-      - "8000:8000"
+      - "8000:9000"
 ```
 
 ### 常用命令
@@ -995,34 +995,34 @@ FastAPI 提供 RESTful API 服务，支持配置管理和触发分析。
 **调用示例**：
 ```bash
 # 健康检查
-curl http://127.0.0.1:8000/api/health
+curl http://127.0.0.1:9000/api/health
 
 # 触发分析（A股）
-curl -X POST http://127.0.0.1:8000/api/v1/analysis/analyze \
+curl -X POST http://127.0.0.1:9000/api/v1/analysis/analyze \
   -H 'Content-Type: application/json' \
   -d '{"stock_code": "600519"}'
 
 # 查询任务状态
-curl http://127.0.0.1:8000/api/v1/analysis/status/<task_id>
+curl http://127.0.0.1:9000/api/v1/analysis/status/<task_id>
 
 # 触发回测（全部股票）
-curl -X POST http://127.0.0.1:8000/api/v1/backtest/run \
+curl -X POST http://127.0.0.1:9000/api/v1/backtest/run \
   -H 'Content-Type: application/json' \
   -d '{"force": false}'
 
 # 触发回测（指定股票）
-curl -X POST http://127.0.0.1:8000/api/v1/backtest/run \
+curl -X POST http://127.0.0.1:9000/api/v1/backtest/run \
   -H 'Content-Type: application/json' \
   -d '{"code": "600519", "force": false}'
 
 # 查询整体回测表现
-curl http://127.0.0.1:8000/api/v1/backtest/performance
+curl http://127.0.0.1:9000/api/v1/backtest/performance
 
 # 查询单股回测表现
-curl http://127.0.0.1:8000/api/v1/backtest/performance/600519
+curl http://127.0.0.1:9000/api/v1/backtest/performance/600519
 
 # 分页查询回测结果
-curl "http://127.0.0.1:8000/api/v1/backtest/results?page=1&limit=20"
+curl "http://127.0.0.1:9000/api/v1/backtest/results?page=1&limit=20"
 ```
 
 ### 自定义配置
@@ -1045,7 +1045,7 @@ python main.py --serve-only --host 0.0.0.0 --port 8888
 
 ### 注意事项
 
-- 浏览器访问：`http://127.0.0.1:8000`（或您配置的端口）
+- 浏览器访问：`http://127.0.0.1:9000`（或您配置的端口）
 - 在云服务器上部署后，不知道浏览器该输入什么地址？请看 [云服务器 Web 界面访问指南](deploy-webui-cloud.md)
 - 分析完成后自动推送通知到配置的渠道
 - 此功能在 GitHub Actions 环境中会自动禁用

@@ -31,6 +31,7 @@
 """
 
 from .base import BaseFetcher, DataFetcherManager
+from .zvt_fetcher import ZvtFetcher
 from .efinance_fetcher import EfinanceFetcher
 from .akshare_fetcher import AkshareFetcher, is_hk_stock_code
 from .tushare_fetcher import TushareFetcher
@@ -41,6 +42,7 @@ from .longbridge_fetcher import LongbridgeFetcher
 from .us_index_mapping import is_us_index_code, is_us_stock_code, get_us_index_yf_symbol, US_INDEX_MAPPING
 
 __all__ = [
+    'ZvtFetcher',
     'BaseFetcher',
     'DataFetcherManager',
     'EfinanceFetcher',

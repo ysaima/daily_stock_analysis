@@ -731,7 +731,7 @@ class Config:
     # === WebUI 配置 ===
     webui_enabled: bool = False
     webui_host: str = "127.0.0.1"
-    webui_port: int = 8000
+    webui_port: int = 9000
     
     # === 机器人配置 ===
     bot_enabled: bool = True              # 是否启用机器人功能
@@ -749,6 +749,9 @@ class Config:
     dingtalk_app_key: Optional[str] = None      # 应用 AppKey
     dingtalk_app_secret: Optional[str] = None   # 应用 AppSecret
     dingtalk_stream_enabled: bool = False       # 是否启用 Stream 模式（无需公网IP）
+    dingtalk_webhook_url: Optional[str] = None  # 自定义机器人 Webhook 地址
+    dingtalk_webhook_secret: Optional[str] = None  # 自定义机器人加签密钥
+    dingtalk_max_bytes: int = 20000             # 单条消息最大字节数
     
     # 企业微信机器人（回调模式）
     wecom_corpid: Optional[str] = None              # 企业 ID
@@ -1329,7 +1332,7 @@ class Config:
             trading_day_check_enabled=os.getenv('TRADING_DAY_CHECK_ENABLED', 'true').lower() != 'false',
             webui_enabled=os.getenv('WEBUI_ENABLED', 'false').lower() == 'true',
             webui_host=os.getenv('WEBUI_HOST', '127.0.0.1'),
-            webui_port=parse_env_int(os.getenv('WEBUI_PORT'), 8000, field_name='WEBUI_PORT', minimum=1, maximum=65535),
+            webui_port=parse_env_int(os.getenv('WEBUI_PORT'), 9000, field_name='WEBUI_PORT', minimum=1, maximum=65535),
             # 机器人配置
             bot_enabled=os.getenv('BOT_ENABLED', 'true').lower() == 'true',
             bot_command_prefix=os.getenv('BOT_COMMAND_PREFIX', '/'),
@@ -1344,6 +1347,9 @@ class Config:
             dingtalk_app_key=os.getenv('DINGTALK_APP_KEY'),
             dingtalk_app_secret=os.getenv('DINGTALK_APP_SECRET'),
             dingtalk_stream_enabled=os.getenv('DINGTALK_STREAM_ENABLED', 'false').lower() == 'true',
+            dingtalk_webhook_url=os.getenv('DINGTALK_WEBHOOK_URL'),
+            dingtalk_webhook_secret=os.getenv('DINGTALK_WEBHOOK_SECRET'),
+            dingtalk_max_bytes=int(os.getenv('DINGTALK_MAX_BYTES', '20000')),
             # 企业微信机器人
             wecom_corpid=os.getenv('WECOM_CORPID'),
             wecom_token=os.getenv('WECOM_TOKEN'),
